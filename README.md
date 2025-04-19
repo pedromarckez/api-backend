@@ -10,6 +10,7 @@ API REST desarrollada con Node.js, Express y MongoDB para la gestión de usuario
 - JWT (JSON Web Tokens)
 - bcrypt
 - multer (para manejo de archivos)
+- Cloudinary (para almacenamiento de imágenes)
 
 ## Instalación
 
@@ -27,6 +28,7 @@ npm install
 ```env
 MONGODB_URI=tu_url_de_mongodb
 JWT_SECRET=tu_secreto_jwt
+CLOUDINARY_URL=tu_url_de_cloudinary
 ```
 
 4. Iniciar el servidor:
@@ -80,6 +82,7 @@ npm start
 - **PUT** `/api/v1/users/:id`
 - **Descripción**: Actualiza datos de un usuario
 - **Autenticación**: Requerida
+- **Permisos**: Solo el propio usuario
 - **Body**:
 ```json
 {
@@ -107,6 +110,57 @@ npm start
 - **DELETE** `/api/v1/users/:id`
 - **Descripción**: Elimina un usuario específico
 - **Autenticación**: Requerida
+- **Permisos**: Administradores pueden eliminar cualquier usuario, usuarios normales solo pueden eliminarse a sí mismos
+- **Respuesta**: 200 OK
+
+## Endpoints de Equipo
+
+### Gestión de Equipos
+
+#### Obtener Todos los Equipos
+- **GET** `/api/v1/teams`
+- **Descripción**: Obtiene lista de todos los equipos
+- **Respuesta**: 200 OK
+
+#### Obtener Equipo por ID
+- **GET** `/api/v1/teams/:id`
+- **Descripción**: Obtiene un equipo específico por su ID
+- **Respuesta**: 200 OK
+
+#### Crear Equipo
+- **POST** `/api/v1/teams`
+- **Descripción**: Crea un nuevo equipo
+- **Autenticación**: Requerida
+- **Permisos**: Solo administradores
+- **Body**:
+```json
+{
+    "name": "string",
+    "description": "string",
+    "img": "file (opcional)"
+}
+```
+- **Respuesta**: 201 Created
+
+#### Actualizar Equipo
+- **PUT** `/api/v1/teams/:id`
+- **Descripción**: Actualiza datos de un equipo
+- **Autenticación**: Requerida
+- **Permisos**: Solo administradores
+- **Body**:
+```json
+{
+    "name": "string",
+    "description": "string",
+    "img": "file (opcional)"
+}
+```
+- **Respuesta**: 201 Created
+
+#### Eliminar Equipo
+- **DELETE** `/api/v1/teams/:id`
+- **Descripción**: Elimina un equipo específico
+- **Autenticación**: Requerida
 - **Permisos**: Solo administradores
 - **Respuesta**: 200 OK
 
@@ -131,15 +185,26 @@ npm start
 }
 ```
 
+### Equipo
+```javascript
+{
+    name: String,
+    description: String,
+    img: String
+}
+```
+
 ## Middleware de Autenticación
 
 ### isAuth
 - Verifica el token JWT en el header de autorización
 - Añade el usuario autenticado al objeto request
+- Devuelve error 401 si el usuario no existe o el token es inválido
 
 ### isAdmin
 - Verifica si el usuario tiene rol de administrador
 - Requerido para operaciones administrativas 
+- Devuelve error 403 si el usuario no es administrador
 
 ## Manejo de Errores
 La API utiliza códigos de estado HTTP estándar:
@@ -155,7 +220,7 @@ La API utiliza códigos de estado HTTP estándar:
 - Contraseñas hasheadas con bcrypt
 - Autenticación mediante JWT
 - Validación de roles para operaciones sensibles
-- Manejo seguro de archivos
+- Manejo seguro de archivos con Cloudinary
 
 ## Contribución
 1. Fork el proyecto

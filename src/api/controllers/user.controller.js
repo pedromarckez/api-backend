@@ -34,8 +34,8 @@ const registerUser = async (req, res, next) => {
             newUser.img = req.file.path;
         }
 
-        const emailDuplicated = await newUser.findOne({ email: req.body.email });
-        const userNameDuplicated = await newUser.findOne({ userName: req.body.userName });
+        const emailDuplicated = await User.findOne({ email: req.body.email });
+        const userNameDuplicated = await User.findOne({ userName: req.body.userName });
 
         if(emailDuplicated){
             return res.status(400).json("Email ya existente");
@@ -56,7 +56,7 @@ const login = async (req, res, next) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
-
+        
         if(!user){
             return res.status(400).json("Usuario o contraseña incorrectos");
         }
@@ -76,12 +76,19 @@ const login = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const newUser = new User(req.body);
+        const userLogged = req.user.id;
 
-        newUser._id = id;
+        if (id !== userLogged) {
+            return res.status(400).json("Solo puedes modificar tu propio usuario");
+        }
 
-        const userUpdated = await User.findByIdAndUpdate(id, newUser, { new: true })
+        // Verificar si el usuario existe
+        const existingUser = await User.findById(id);
+        if (!existingUser) {
+            return res.status(404).json("Usuario no encontrado");
+        }
 
+        const userUpdated = await User.findByIdAndUpdate(id, req.body, { new: true });
         return res.status(201).json(userUpdated);
     } catch (error) {
         return res.status(400).json("Error");
@@ -93,6 +100,7 @@ const updateUserRole = async (req, res, next) => {
         const { id } = req.params;
         const { role } = req.body;
 
+        // Verificar que el rol sea válido
         if (role !== "user" && role !== "admin") {
             return res.status(400).json("Rol no válido. Debe ser 'user' o 'admin'");
         }
@@ -116,32 +124,30 @@ const updateUserRole = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params;
+        
+        // Verificar si el usuario existe
+        const userToDelete = await User.findById(id);
+        if (!userToDelete) {
+            return res.status(404).json("Usuario no encontrado");
+        }
+
+        // Verificar permisos: admin puede eliminar cualquier usuario, usuario normal solo puede eliminarse a sí mismo
+        if (req.user.role !== "admin" && req.user._id.toString() !== id) {
+            return res.status(403).json("No tienes permiso para eliminar este usuario");
+        }
+
+        // Verificar si el usuario tiene imagen y eliminarla
+        if (userToDelete.img) {
+            await deleteFile(userToDelete.img);
+        }
+
         const userDeleted = await User.findByIdAndDelete(id);
-
-        deleteFile(userDeleted.img);
-
         return res.status(200).json({
             message: "Usuario eliminado",
             element: userDeleted,
         });
     } catch (error) {
-        return res.status(400).json("Error")
-    }
-}
-
-const deleteAnyUser = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const userDeleted = await User.findByIdAndDelete(id);
-
-        deleteFile(userDeleted.img)
-        
-        return res.status(200).json({
-            message: "Usuario eliminado",
-            element: userDeleted,
-        }); 
-    } catch (error) {
-        return res.status(400).json("Error")
+        return res.status(500).json("Error al eliminar el usuario");
     }
 }
 
@@ -152,6 +158,5 @@ module.exports = {
     login,
     updateUser,
     updateUserRole,
-    deleteUser,
-    deleteAnyUser
+    deleteUser
 }

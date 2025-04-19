@@ -5,7 +5,7 @@ const teams = require("../../data/teams");
 
 const lanzarSemilla = async () => {
     try {   
-        await mongoose.connect("mongodb+srv://pedromarquez93:wrs3M2AH57XCV5WD@cluster0.muoct4g.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
+        await mongoose.connect(process.env(DB_URL)); //usamos .env para conectar semilla a la BBDD
         
         await Team.collection.drop();
         console.log("Equipos eliminados");

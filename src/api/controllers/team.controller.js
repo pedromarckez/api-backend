@@ -26,17 +26,16 @@ const getTeamById = async (req, res, next) => {
 
 const createTeam = async (req, res, next) => {
     try {
-        const newTeam = req.body;
+        const newTeam = new Team(req.body);
 
         if (req.file){
             newTeam.img = req.file.path;
         }
 
-        const teamDuplicate = await newTeam.findOne({name: req.body.name});
+        const teamDuplicate = await Team.findOne({name: req.body.name});
 
         if(teamDuplicate){
             return res.status(400).json("Este equipo ya existe");
-            
         }
 
         const saveTeam = await newTeam.save();
@@ -50,11 +49,14 @@ const createTeam = async (req, res, next) => {
 const updateTeam = async (req, res, next) =>  {
     try {
         const { id } = req.params;
-        const newTeam = new Team(req.body);
+        
+        // Verificar si el equipo existe
+        const existingTeam = await Team.findById(id);
+        if (!existingTeam) {
+            return res.status(404).json("Equipo no encontrado");
+        }
 
-        newTeam._id = id;
-
-        const teamUpdated = Team.findByIdAndUpdate(id, newTeam, { new: true });
+        const teamUpdated = await Team.findByIdAndUpdate(id, req.body, { new: true });
 
         return res.status(201).json(teamUpdated);
     } catch (error) {
@@ -66,9 +68,11 @@ const deleteTeam = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const teamDeleted = Team.findByIdAndDelete(id);
+        const teamDeleted = await Team.findByIdAndDelete(id);
 
-        deleteFile(teamDeleted.img);
+        if (teamDeleted.img) {
+            await deleteFile(teamDeleted.img);
+        }
 
         return res.status(200).json({
             message: "Equipo eliminado",

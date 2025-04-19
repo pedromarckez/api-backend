@@ -7,7 +7,7 @@ const teamsRouter = require("express").Router();
 teamsRouter.get("/", getTeams);
 teamsRouter.get("/:id", getTeamById);
 teamsRouter.post("/", isAdmin, upload.single("img"), createTeam);
-teamsRouter.put(":id", isAdmin, updateTeam);
+teamsRouter.put("/:id", isAdmin, updateTeam);
 teamsRouter.delete("/:id", isAdmin, deleteTeam);
 
 

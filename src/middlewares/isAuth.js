@@ -9,6 +9,10 @@ const isAuth = async (req, res, next) => {
         const { id } = verifyJwt(token);
 
         const user = await User.findById(id);
+        
+        if (!user) {
+            return res.status(401).json("Usuario no encontrado");
+        }
 
         user.password = null;
         req.user = user;

@@ -82,7 +82,7 @@ const updateUser = async (req, res, next) => {
             return res.status(400).json("Solo puedes modificar tu propio usuario");
         }
 
-        // Verificar si el usuario existe
+        // Verificamos si el usuario existe
         const existingUser = await User.findById(id);
         if (!existingUser) {
             return res.status(404).json("Usuario no encontrado");
@@ -100,7 +100,7 @@ const updateUserRole = async (req, res, next) => {
         const { id } = req.params;
         const { role } = req.body;
 
-        // Verificar que el rol sea válido
+        // Verificamos que el rol sea válido
         if (role !== "user" && role !== "admin") {
             return res.status(400).json("Rol no válido. Debe ser 'user' o 'admin'");
         }

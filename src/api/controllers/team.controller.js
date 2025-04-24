@@ -1,7 +1,7 @@
 const { deleteFile } = require("../../utils/deleteFile");
 const Team = require("../models/team.model");
 
-
+// añadimos awaits que faltaban
 
 const getTeams = async (req, res, next) => {
     try {

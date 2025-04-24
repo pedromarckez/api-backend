@@ -125,18 +125,18 @@ const deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params;
         
-        // Verificar si el usuario existe
+        // Verificamos si el usuario existe
         const userToDelete = await User.findById(id);
         if (!userToDelete) {
             return res.status(404).json("Usuario no encontrado");
         }
 
-        // Verificar permisos: admin puede eliminar cualquier usuario, usuario normal solo puede eliminarse a sí mismo
+        // Verificamos los permisos: admin puede eliminar cualquier usuario, usuario normal solo puede eliminarse a sí mismo
         if (req.user.role !== "admin" && req.user._id.toString() !== id) {
             return res.status(403).json("No tienes permiso para eliminar este usuario");
         }
 
-        // Verificar si el usuario tiene imagen y eliminarla
+        // Verificamos si el usuario tiene imagen y eliminarla
         if (userToDelete.img) {
             await deleteFile(userToDelete.img);
         }

@@ -87,7 +87,7 @@ const updateUser = async (req, res, next) => {
         if (!existingUser) {
             return res.status(404).json("Usuario no encontrado");
         }
-
+        
         const userUpdated = await User.findByIdAndUpdate(id, req.body, { new: true });
         return res.status(201).json(userUpdated);
     } catch (error) {
@@ -120,7 +120,7 @@ const updateUserRole = async (req, res, next) => {
         return res.status(500).json("Error al actualizar el rol del usuario");
     }
 }
-
+    // Solo un deleteUser para no repetirnos
 const deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params;
